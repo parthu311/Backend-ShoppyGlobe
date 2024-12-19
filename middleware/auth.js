@@ -1,22 +1,29 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-const crypto = require('crypto');
+// Secret key for JWT
+const secret = process.env.JWT_SECRET; 
 
-const secret = crypto.randomBytes(32).toString('hex'); // Generates a 256-bit secret
-console.log('JWT Secret:', secret);
-module.exports = secret;  
-
-
+// Middleware to authenticate and validate the JWT token
 const authenticate = (req, res, next) => {
-    const token = jwt.sign({ userId: 123 }, secret, { expiresIn: '1h' });
-    console.log('Token:', token);
-  if (!token) return res.status(401).json({ message: "Access denied" });
+  // Get the token from the Authorization header
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    return res.status(401).json({ message: "Access denied. No token provided." });
+  }
 
   try {
+    // Verify the token using the secret key
     const decoded = jwt.verify(token, secret);
+    
+    // Attach the user information from the decoded token to req.user
     req.user = decoded;
+
+    // Proceed to the next middleware or route handler
     next();
   } catch (err) {
+    // If token verification fails
     res.status(401).json({ message: "Invalid token" });
   }
 };

@@ -3,8 +3,10 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
-const secret = require('../middleware/auth')
-console.log("This" , secret)
+require("dotenv").config(); 
+
+
+const secret = process.env.JWT_SECRET; 
 
 // POST /register
 router.post("/register", async (req, res) => {
